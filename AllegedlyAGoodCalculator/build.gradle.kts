@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    namespace = "edu.uark.ahnelson.allegedlyabadcalculator"
+    namespace = "jaedenwest.allegedlyagoodcalculator"
     compileSdk {
         version = release(37)
     }
 
     defaultConfig {
-        applicationId = "edu.uark.ahnelson.allegedlyabadcalculator"
+        applicationId = "jaedenwest.allegedlyagoodcalculator"
         minSdk = 30
         targetSdk = 37
         versionCode = 1
