@@ -34,7 +34,6 @@ class CalculatorModel {
             OperatorT.TIMES -> operand1*operand2
             OperatorT.DIVIDE -> {
                 if(operand2 == 0.0f){
-                    //TODO Handle Divide by 0
                     null
                 }else{
                     operand1/operand2

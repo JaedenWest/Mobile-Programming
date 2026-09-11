@@ -5,9 +5,7 @@ plugins {
 
 android {
     namespace = "jaedenwest.allegedlyagoodcalculator"
-    compileSdk {
-        version = release(37)
-    }
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "jaedenwest.allegedlyagoodcalculator"

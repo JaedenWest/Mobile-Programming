@@ -23,5 +23,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "AllegedlyAGoodCalculator"
-include(":app")
+include(":AllegedlyAGoodCalculator")
  
