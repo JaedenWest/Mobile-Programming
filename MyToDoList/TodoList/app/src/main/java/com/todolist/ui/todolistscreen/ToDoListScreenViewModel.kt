@@ -24,17 +24,29 @@ class ToDoListScreenViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    fun insertTodoItemToRepository(itemName: String) {
+    fun insertTodoItemToRepository(title: String) {
         viewModelScope.launch {
             val todoItem = TodoEntity(
                 id = 0,
-                name = itemName,
-                quantity = 1,
+                title = title,
+                content = "",
                 isCompleted = false,
-                notes = ""
+                dueDate = 0L
             )
-            Log.d("ListScreenVM", "Item Inserted ${todoItem.name}")
+            Log.d("ListScreenVM", "Item Inserted ${todoItem.title}")
             repository.insertTodoItem(todoItem)
+        }
+    }
+
+    fun toggleTaskCompleted(todoItem: TodoEntity) {
+        viewModelScope.launch {
+            repository.updateTodoItem(todoItem.copy(isCompleted = !todoItem.isCompleted))
+        }
+    }
+
+    fun clearCompletedTasks() {
+        viewModelScope.launch {
+            repository.deleteCompletedItems()
         }
     }
 }

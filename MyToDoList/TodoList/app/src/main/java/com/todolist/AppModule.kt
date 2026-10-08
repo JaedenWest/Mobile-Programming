@@ -25,7 +25,9 @@ object AppModule {
             context,
             TodoListDatabase::class.java,
             "todolist_database"
-        ).build()
+        )
+        .fallbackToDestructiveMigration()
+        .build()
     }
 
     @Provides

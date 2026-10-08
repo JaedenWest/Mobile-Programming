@@ -12,7 +12,7 @@ class TodoListRepository(private val todoListDao: TodoListDao) {
 
     suspend fun insertTodoItem(item: TodoEntity){
         todoListDao.insertTodoItem(item)
-        Log.d("Repository","Item Inserted: ${item.name}")
+        Log.d("Repository","Item Inserted: ${item.title}")
     }
 
     suspend fun updateTodoItem(item: TodoEntity){
@@ -21,5 +21,9 @@ class TodoListRepository(private val todoListDao: TodoListDao) {
 
     suspend fun deleteItem(id: Int) {
         todoListDao.deleteTodoItem(id)
+    }
+
+    suspend fun deleteCompletedItems() {
+        todoListDao.deleteCompletedItems()
     }
 }

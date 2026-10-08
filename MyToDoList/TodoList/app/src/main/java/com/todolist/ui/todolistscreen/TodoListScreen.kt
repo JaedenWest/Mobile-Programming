@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.todolist.domain.TodoEntity
+import com.todolist.util.DateTimeUtils
 
 @Composable
 fun TodoListScreenRoot(
@@ -29,8 +30,12 @@ fun TodoListScreenRoot(
             viewModel.insertTodoItemToRepository(item)
             Log.d("TodoListScreen", "Item Inserted: $item")
         },
-        onToggleCompleted = { },
-        onClearCompleted = { },
+        onToggleCompleted = { item ->
+            viewModel.toggleTaskCompleted(item)
+        },
+        onClearCompleted = {
+            viewModel.clearCompletedTasks()
+        },
         onItemClick = onItemClick
     )
 }
@@ -121,14 +126,14 @@ fun TodoListScreen(
                             onCheckedChange = { onToggleCompleted(item) }
                         )
                         Text(
-                            text = item.name,
+                            text = item.title,
                             textDecoration = if (item.isCompleted) TextDecoration.LineThrough else TextDecoration.None,
                             fontWeight = if (item.isCompleted) FontWeight.Normal else FontWeight.Medium
                         )
                     }
 
                     Text(
-                        text = "Qty: ${item.quantity}",
+                        text = DateTimeUtils.formatDateTime(item.dueDate),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -143,9 +148,9 @@ fun TodoListScreenPreview() {
     MaterialTheme {
         TodoListScreen(
             itemList = listOf(
-                TodoEntity(id = 1, name = "Finish Android project", quantity = 1, isCompleted = false),
-                TodoEntity(id = 2, name = "Buy groceries", quantity = 1, isCompleted = false),
-                TodoEntity(id = 3, name = "Read 20 pages", quantity = 1, isCompleted = true)
+                TodoEntity(id = 1, title = "Finish Android project", isCompleted = false, dueDate = System.currentTimeMillis()),
+                TodoEntity(id = 2, title = "Buy groceries", isCompleted = false, dueDate = System.currentTimeMillis()),
+                TodoEntity(id = 3, title = "Read 20 pages", isCompleted = true, dueDate = 0L)
             ),
             onAddItem = {},
             onToggleCompleted = {},
