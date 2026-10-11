@@ -2,20 +2,21 @@ package com.todolist
 
 import android.content.Context
 import androidx.room.Room
+import com.todolist.data.local.TodoListDao
+import com.todolist.data.local.TodoListDatabase
+import com.todolist.data.local.TodoListRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import com.todolist.data.local.TodoListDao
-import com.todolist.data.local.TodoListDatabase
-import com.todolist.data.local.TodoListRepository
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
+    /** Provides the Singleton instance of the Room TodoListDatabase. */
     @Provides
     @Singleton
     fun provideTodoListDatabase(
@@ -30,15 +31,16 @@ object AppModule {
         .build()
     }
 
+    /** Provides the TodoListDao instance from the database. */
     @Provides
     fun provideTodoListDao(database: TodoListDatabase): TodoListDao {
         return database.todoListDao()
     }
 
+    /** Provides the Singleton TodoListRepository wrapping the DAO. */
     @Provides
     @Singleton
     fun provideTodoListRepository(todoListDao: TodoListDao): TodoListRepository {
         return TodoListRepository(todoListDao)
     }
-
 }

@@ -2,12 +2,14 @@ package com.todolist.ui.todoitemscreen
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -114,6 +116,24 @@ fun TodoDetailScreen(
                             contentDescription = "Navigate Back"
                         )
                     }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            val shareText = "Task: $title\nNotes: $notes\nDue: ${DateTimeUtils.formatDateTime(dueDate)}"
+                            val sendIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, shareText)
+                                type = "text/plain"
+                            }
+                            context.startActivity(Intent.createChooser(sendIntent, "Share Task"))
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = "Share Task"
+                        )
+                    }
                 }
             )
         }
@@ -218,14 +238,45 @@ fun TodoDetailScreen(
 
                 Button(
                     onClick = {
-                        onSaveItem(
-                            item.copy(
-                                title = title,
-                                content = notes,
-                                dueDate = dueDate,
-                                isCompleted = isCompleted
-                            )
+                        val updatedItem = item.copy(
+                            title = title,
+                            content = notes,
+                            dueDate = dueDate,
+                            isCompleted = isCompleted
                         )
+                        if (dueDate > System.currentTimeMillis() && !isCompleted) {
+                            try {
+                                val alarmManager = context.getSystemService(android.content.Context.ALARM_SERVICE) as android.app.AlarmManager
+                                val alarmIntent = Intent(context, com.todolist.MyToDoListReceiver::class.java).apply {
+                                    putExtra("id", updatedItem.id)
+                                    putExtra("item", updatedItem.title)
+                                }
+                                val pendingIntent = android.app.PendingIntent.getBroadcast(
+                                    context,
+                                    updatedItem.id,
+                                    alarmIntent,
+                                    android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+                                )
+                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
+                                    alarmManager.setAndAllowWhileIdle(
+                                        android.app.AlarmManager.RTC_WAKEUP,
+                                        dueDate,
+                                        pendingIntent
+                                    )
+                                } else {
+                                    alarmManager.setExactAndAllowWhileIdle(
+                                        android.app.AlarmManager.RTC_WAKEUP,
+                                        dueDate,
+                                        pendingIntent
+                                    )
+                                }
+                            } catch (e: SecurityException) {
+                                e.printStackTrace()
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                        onSaveItem(updatedItem)
                     },
                     enabled = title.isNotBlank(),
                     modifier = Modifier.weight(1f)
