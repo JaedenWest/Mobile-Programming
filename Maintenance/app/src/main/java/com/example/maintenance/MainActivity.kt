@@ -12,7 +12,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -23,9 +22,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.maintenance.ui.theme.MaintenanceTheme
 
 class MainActivity : ComponentActivity() {
@@ -45,39 +45,62 @@ class MainActivity : ComponentActivity() {
 fun MaintenanceAppNavigation() {
     val navController = rememberNavController()
 
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
     NavigationSuiteScaffold(
         navigationSuiteItems = {
-            AppDestinations.entries.forEach {
+            AppDestinations.entries.forEach { destination ->
                 item(
                     icon = {
                         Icon(
-                            painterResource(it.icon),
-                            contentDescription = it.label
+                            painterResource(destination.icon),
+                            contentDescription = destination.label
                         )
                     },
-                    label = { Text(it.label) },
-                    selected = it == currentDestination,
-                    onClick = { currentDestination = it }
+                    label = { Text(destination.label) },
+                    selected = currentRoute == destination.route,
+                    onClick = {
+                        navController.navigate(destination.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            //avoid having multiple copies of the same destination
+                            launchSingleTop = true
+                            //restore state when selecting a previously selected tab
+                            restoreState = true
+                        }
+                    }
                 )
             }
         }
     ) {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Greeting(
-                name = "Android",
-                modifier = Modifier.padding(innerPadding)
-            )
+        //hosts the screen content
+        NavHost(
+            navController = navController,
+            startDestination = AppDestinations.HOME.route
+            ){
+            composable(AppDestinations.HOME.route){
+                Greeting("Home Screen")
+            }
+            composable(AppDestinations.FAVORITES.route){
+                Greeting("Favorites Screen")
+            }
+            composable(AppDestinations.PROFILE.route){
+                Greeting("Profile Screen")
+            }
         }
     }
 }
 
 enum class AppDestinations(
+    val route: String,
     val label: String,
     val icon: Int,
-) {
-    HOME("Home", R.drawable.ic_home),
-    FAVORITES("Favorites", R.drawable.ic_favorite),
-    PROFILE("Profile", R.drawable.ic_account_box),
+    ) {
+    HOME("home","Home", R.drawable.ic_home),
+    FAVORITES("favorites","Favorites",R.drawable.ic_favorite),
+    PROFILE("profile","Profile", R.drawable.ic_account_box),;
 }
 
 @Composable
